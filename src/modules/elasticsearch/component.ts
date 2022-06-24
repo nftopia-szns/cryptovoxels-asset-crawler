@@ -47,7 +47,7 @@ export async function createElasticsearchComponent(components: {
     const bcChainId = await config.requireNumber('BLOCKCHAIN_CHAIN_ID')
 
     // check and init mappings
-    const PROPERTY_INDEX_NAME = `crytovoxels-${bcNetwork}-${bcChainId}`
+    const PROPERTY_INDEX_NAME = `cryptovoxels-${bcNetwork}-${bcChainId}`
     const isPropertyIndexExisted = await client.indices.exists({ index: PROPERTY_INDEX_NAME })
     if (!isPropertyIndexExisted) {
         console.log('property index unexisted, create new');
@@ -105,10 +105,10 @@ export async function createElasticsearchComponent(components: {
                         "type": "integer",
                     },
                     "attributes.suburb": {
-                        "type": "text",
+                        "type": "keyword",
                     },
                     "attributes.island": {
-                        "type": "text",
+                        "type": "keyword",
                     },
                     "attributes.has_basement": {
                         "type": "keyword",
