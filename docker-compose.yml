@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  # extended-atlas-server:
+  #   build: .
+  #   restart: always
+  #   environment:
+  #     - POSTGRES_HOST=db
+  #     - HTTP_SERVER_PORT=${HTTP_SERVER_PORT}
+  #     - HTTP_SERVER_HOST=${HTTP_SERVER_HOST}
+  #     - CORS_ORIGIN=${CORS_ORIGIN}
+  #     - CORS_METHOD=${CORS_METHOD}
+  #     - API_URL=${API_URL}
+  #     - API_BATCH_SIZE=${API_BATCH_SIZE}
+  #     - API_CONCURRENCY=${API_CONCURRENCY}
+  #     - REFRESH_INTERVAL=${REFRESH_INTERVAL}
+  #     - POSTGRES_PORT=${POSTGRES_PORT}
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PWD=${POSTGRES_PWD}
+  #     - POSTGRES_DB_NAME=${POSTGRES_DB_NAME}
+  #   ports:
+  #   - '${HTTP_SERVER_PORT}:${HTTP_SERVER_PORT}'
+  #   depends_on: 
+  #   - db
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.2.0
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    ports:
+      - '${ES_NODE_PORT}:9200'
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.2.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200 # internal network
+    depends_on:
+      - elasticsearch
+    ports:
+      - '${ES_KIBANA_PORT}:5601'
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PWD}
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+    volumes:
+      - db:/var/lib/postgresql/data
+    env_file:
+      - .env
+volumes:
+  db:
+    driver: local
