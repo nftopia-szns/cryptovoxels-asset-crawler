@@ -115,7 +115,7 @@ export async function createDatabaseComponent(components: {
         const landTokenRepo = await dataSource.getRepository(Parcel)
         let landToken = await landTokenRepo.findOneBy({ id: _landTokenId })
         if (landToken !== null) {
-            landToken.tokenURIContent = _landTokenURIContent
+            landToken.tokenURIContent = JSON.parse(_landTokenURIContent)
             await landTokenRepo.save(landToken)
         }
     }
