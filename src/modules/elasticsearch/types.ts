@@ -17,7 +17,7 @@ export class SandboxPropertyElasticsearch {
     description: string
     image: string
     external_url: string
-    attributes: object
+    attributes: Attributes
 }
 
 export type ParcelURIFormat = {
@@ -26,7 +26,6 @@ export type ParcelURIFormat = {
     image: string
     attributes: Attributes
     external_url: string
-    background_color: string
 }
 
 export type Attributes = {

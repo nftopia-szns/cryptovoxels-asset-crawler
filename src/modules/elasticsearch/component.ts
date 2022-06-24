@@ -47,7 +47,7 @@ export async function createElasticsearchComponent(components: {
     const bcChainId = await config.requireNumber('BLOCKCHAIN_CHAIN_ID')
 
     // check and init mappings
-    const PROPERTY_INDEX_NAME = `sandbox-${bcNetwork}-${bcChainId}`
+    const PROPERTY_INDEX_NAME = `crytovoxels-${bcNetwork}-${bcChainId}`
     const isPropertyIndexExisted = await client.indices.exists({ index: PROPERTY_INDEX_NAME })
     if (!isPropertyIndexExisted) {
         console.log('property index unexisted, create new');
@@ -73,12 +73,6 @@ export async function createElasticsearchComponent(components: {
                         "type": "text",
                         "index": false
                     },
-                    "category": {
-                        "type": "keyword"
-                    },
-                    "land_type": {
-                        "type": "keyword"
-                    },
                     "name": {
                         "type": "text",
                         "analyzer": "standard"
@@ -95,27 +89,42 @@ export async function createElasticsearchComponent(components: {
                         "type": "text",
                         "index": false,
                     },
-                    "attributes.x": {
+                    "attributes.area": {
+                        "type": "double",
+                    },
+                    "attributes.width": {
                         "type": "integer",
                     },
-                    "attributes.y": {
+                    "attributes.depth": {
                         "type": "integer",
                     },
-                    "attributes.coordinate": {
+                    "attributes.height": {
+                        "type": "integer",
+                    },
+                    "attributes.elevation": {
+                        "type": "integer",
+                    },
+                    "attributes.suburb": {
+                        "type": "text",
+                    },
+                    "attributes.island": {
+                        "type": "text",
+                    },
+                    "attributes.has_basement": {
                         "type": "keyword",
                     },
-                    "sandbox.name": {
+                    "attributes.title": {
                         "type": "text",
-                        "index": false,
                     },
-                    "sandbox.description": {
-                        "type": "text",
-                        "index": false,
+                    "attributes.pre-built": {
+                        "type": "boolean"
                     },
-                    "sandbox.image": {
-                        "type": "text",
-                        "index": false,
-                    }
+                    "attributes.waterfront": {
+                        "type": "keyword"
+                    },
+                    "attributes.closest-common": {
+                        "type": "keyword"
+                    },
                 }
             }
         })
@@ -133,29 +142,17 @@ export async function createElasticsearchComponent(components: {
             landToken.owner = _landToken.owner.id
             landToken.network = bcNetwork
             landToken.chain_id = bcChainId
-            landToken.contract_address = 'emptyyyy'
-            // // TODO: adjust this we get estate of the sand box
-            // landToken.category = LandCategory.Land
-            // landToken.attributes = {
-            //     x: _landToken.x,
-            //     y: _landToken.y,
-            //     coordinate: `${_landToken.x},${_landToken.y}`
-            // }
+            landToken.contract_address = '0x7be8076f4ea4a4ad08075c2508e481d6c946d12b'
 
-            // if (_landToken.tokenURIContent && _landToken.tokenURIContent !== '{}') {
-            //     const tokenURIContent: ParcelURIFormat = JSON.parse(_landToken.tokenURIContent)
-            //     const attributes = parseAttributes(tokenURIContent.properties)
-            //     landToken.land_type = attributes["land_type"]
-            //     landToken.image = tokenURIContent.image // should not use image in sandbox
-            //     landToken.external_url = tokenURIContent.external_url
-            //     landToken.sandbox = tokenURIContent.sandbox
-            //     if (tokenURIContent.sandbox.name) {
-            //         landToken.name = tokenURIContent.sandbox.name
-            //     }
-            //     if (tokenURIContent.sandbox.description) {
-            //         landToken.name = tokenURIContent.sandbox.description
-            //     }
-            // }
+            if (_landToken.tokenURIContent && Object.keys(_landToken.tokenURIContent).length > 0) {
+                landToken.name = _landToken.tokenURIContent.name
+                landToken.description = _landToken.tokenURIContent.description
+                landToken.image = _landToken.tokenURIContent.image
+                landToken.external_url = _landToken.tokenURIContent.external_url
+
+                const attributes = _landToken.tokenURIContent.attributes
+                landToken.attributes = attributes
+            }
 
             dataset.push(landToken)
         }

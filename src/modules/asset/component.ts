@@ -120,26 +120,24 @@ export async function createAssetComponent(components: {
           console.log('Fetched ', landToken.id);
           await database.updateTokenURIContent(landToken.id, JSON.stringify(content))
           
-          // // in case if this is valid content -> update in elasticsearch
-          // if (Object.keys(content).length > 0) {
-          //   // update in elasticsearch
-          //   const landTokenFragment = {
-          //     id: landToken.id.toString(),
-          //     owner: {
-          //       id: landToken.owner
-          //     },
-          //     x: landToken.x,
-          //     y: landToken.y,
-          //     tokenURI: landToken.tokenURI,
-          //     timestamp: landToken.timestamp.valueOf() / 1000 as BigNumberish, // convert to seconds
-          //     tokenURIContent: JSON.stringify(content),
-          //   }
-          //   await elasticsearch.bulkInsertParcels([landTokenFragment])
-          // }
+          // in case if this is valid content -> update in elasticsearch
+          if (Object.keys(content).length > 0) {
+            // update in elasticsearch
+            const landTokenFragment = {
+              id: landToken.id.toString(),
+              owner: {
+                id: landToken.owner
+              },
+              tokenURIContent: content,
+            }
+            await elasticsearch.bulkInsertParcels([landTokenFragment])
+          }
         } catch (error) {
           console.error(`Token ${landToken.id} URI content fetch failed: ${error}`)
         }
       }
+
+      fetchTokenURIContent()
     }
   }
 

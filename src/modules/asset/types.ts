@@ -1,4 +1,5 @@
 import { BigNumberish } from "@ethersproject/bignumber"
+import { ParcelURIFormat } from "../elasticsearch/types"
 
 export type AssetConfig = {
   API_URL: string
@@ -13,6 +14,7 @@ export interface IAssetComponent {
 export type ParcelFragment = {
   id: string
   owner: { id: string }
+  tokenURIContent?: ParcelURIFormat
 }
 
 export type ParcelBatch = { landTokens: ParcelFragment[] }
