@@ -1,7 +1,7 @@
 
 GET _cat/indices
 
-GET /sandbox-ethereum-1/_search
+GET /cryptovoxels-ethereum-mainnet/_search
 {
     "query": {
         "match_all": {}

@@ -1,8 +1,11 @@
 import { IBaseComponent, IConfigComponent } from "@well-known-components/interfaces";
-import { IElasticsearchComponent, SandboxPropertyElasticsearch } from "./types";
+import { IElasticsearchComponent, ParcelURIFormat, SandboxPropertyElasticsearch } from "./types";
 import { Client } from '@elastic/elasticsearch'
 import { ParcelFragment } from "../asset/types";
-import fetch from 'node-fetch'
+import { ChainId, EthereumNetwork } from "nftopia-shared/dist/shared/network"
+import { MetaversePlatform } from "nftopia-shared/dist/shared/platform"
+import { CrytovoxelsAssetDto } from "nftopia-shared/dist/shared/asset"
+import { CrytovoxelsAssetAttributes } from "nftopia-shared/dist/shared/asset/cryptovoxels";
 
 export async function createElasticsearchComponent(components: {
     config: IConfigComponent,
@@ -43,11 +46,11 @@ export async function createElasticsearchComponent(components: {
     }
 
     // get config of blockchain network, chain id and contract addresses
-    const bcNetwork = await config.requireString('BLOCKCHAIN_NETWORK')
-    const bcChainId = await config.requireNumber('BLOCKCHAIN_CHAIN_ID')
+    const bcChainId = (await config.requireString('BLOCKCHAIN_CHAIN_ID')) as ChainId
+    const bcNetwork = (await config.requireString('BLOCKCHAIN_NETWORK')) as EthereumNetwork
 
     // check and init mappings
-    const PROPERTY_INDEX_NAME = `cryptovoxels-${bcNetwork}-${bcChainId}`
+    const PROPERTY_INDEX_NAME = `${MetaversePlatform.Cryptovoxels}-${bcChainId}-${bcNetwork}`
     const isPropertyIndexExisted = await client.indices.exists({ index: PROPERTY_INDEX_NAME })
     if (!isPropertyIndexExisted) {
         console.log('property index unexisted, create new');
@@ -55,23 +58,24 @@ export async function createElasticsearchComponent(components: {
             index: PROPERTY_INDEX_NAME,
             mappings: {
                 properties: {
-                    "id": {
-                        "type": "keyword",
-                    },
-                    "owner": {
-                        "type": "keyword",
+                    // base asset dto
+                    "platform": {
+                        "type": "keyword"
                     },
                     "network": {
                         "type": "keyword",
                         "index": false,
                     },
                     "chain_id": {
-                        "type": "integer",
+                        "type": "keyword",
                         "index": false,
                     },
                     "contract_address": {
                         "type": "text",
                         "index": false
+                    },
+                    "id": {
+                        "type": "keyword",
                     },
                     "name": {
                         "type": "text",
@@ -81,6 +85,9 @@ export async function createElasticsearchComponent(components: {
                         "type": "text",
                         "analyzer": "standard"
                     },
+                    "owner": {
+                        "type": "keyword",
+                    },
                     "image": {
                         "type": "text",
                         "index": false,
@@ -89,6 +96,7 @@ export async function createElasticsearchComponent(components: {
                         "type": "text",
                         "index": false,
                     },
+                    // attributes
                     "attributes.area": {
                         "type": "double",
                     },
@@ -135,23 +143,40 @@ export async function createElasticsearchComponent(components: {
     const bulkInsertParcels = async (_landTokens: ParcelFragment[]) => {
         if (_landTokens.length === 0) return
 
-        let dataset: SandboxPropertyElasticsearch[] = []
+        let dataset: CrytovoxelsAssetDto[] = []
         for (const _landToken of _landTokens) {
-            let landToken = new SandboxPropertyElasticsearch()
-            landToken.id = _landToken.id
-            landToken.owner = _landToken.owner.id
-            landToken.network = bcNetwork
-            landToken.chain_id = bcChainId
-            landToken.contract_address = '0x7be8076f4ea4a4ad08075c2508e481d6c946d12b'
+            let name = ""
+            let description = ""
+            let image = ""
+            let external_url = ""
+            let attributes = {}
 
-            if (_landToken.tokenURIContent && Object.keys(_landToken.tokenURIContent).length > 0) {
-                landToken.name = _landToken.tokenURIContent.name
-                landToken.description = _landToken.tokenURIContent.description
-                landToken.image = _landToken.tokenURIContent.image
-                landToken.external_url = _landToken.tokenURIContent.external_url
+            if (_landToken.tokenURIContent) {
+                try {
+                    const tokenURIContent: ParcelURIFormat = _landToken.tokenURIContent
+                    name = tokenURIContent.name
+                    description = tokenURIContent.description
+                    image = tokenURIContent.image
+                    external_url = tokenURIContent.external_url
+                    attributes = tokenURIContent.attributes
+                } catch (error) {
+                    console.error("Failed to process token URI content of #" + _landToken.id);
+                    console.log("tokenURIContent: ", _landToken.tokenURIContent);
+                }
+            }
 
-                const attributes = _landToken.tokenURIContent.attributes
-                landToken.attributes = attributes
+            let landToken: CrytovoxelsAssetDto = {
+                platform: MetaversePlatform.Cryptovoxels,
+                network: bcNetwork,
+                chain_id: bcChainId,
+                contract_address: '0x7be8076f4ea4a4ad08075c2508e481d6c946d12b',
+                id: _landToken.id,
+                name: name,
+                description: description,
+                owner: _landToken.owner.id,
+                image: image,
+                external_url: external_url,
+                attributes: attributes as CrytovoxelsAssetAttributes,
             }
 
             dataset.push(landToken)
