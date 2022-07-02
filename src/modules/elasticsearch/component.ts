@@ -1,5 +1,5 @@
 import { IBaseComponent, IConfigComponent } from "@well-known-components/interfaces";
-import { IElasticsearchComponent, ParcelURIFormat, SandboxPropertyElasticsearch } from "./types";
+import { IElasticsearchComponent, ParcelURIFormat } from "./types";
 import { Client } from '@elastic/elasticsearch'
 import { ParcelFragment } from "../asset/types";
 import { ChainId, EthereumNetwork } from "nftopia-shared/dist/shared/network"

@@ -7,19 +7,6 @@ export interface IElasticsearchComponent {
     // bulkInsertEstates: (_estates: EstateFragment[]) => Promise<void>,
 }
 
-export class SandboxPropertyElasticsearch {
-    id: string
-    owner: string
-    network: string
-    chain_id: number
-    contract_address: string
-    name: string
-    description: string
-    image: string
-    external_url: string
-    attributes: Attributes
-}
-
 export type ParcelURIFormat = {
     name: string
     description: string
