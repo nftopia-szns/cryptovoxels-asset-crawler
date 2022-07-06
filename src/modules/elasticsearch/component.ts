@@ -2,7 +2,7 @@ import { IBaseComponent, IConfigComponent } from "@well-known-components/interfa
 import { IElasticsearchComponent, ParcelURIFormat } from "./types";
 import { Client } from '@elastic/elasticsearch'
 import { ParcelFragment } from "../asset/types";
-import { ChainId, EthereumNetwork } from "nftopia-shared/dist/shared/network"
+import { Network, EthereumChainId } from "nftopia-shared/dist/shared/network"
 import { MetaversePlatform } from "nftopia-shared/dist/shared/platform"
 import { CrytovoxelsAssetDto } from "nftopia-shared/dist/shared/asset"
 import { CrytovoxelsAssetAttributes } from "nftopia-shared/dist/shared/asset/cryptovoxels";
@@ -46,8 +46,8 @@ export async function createElasticsearchComponent(components: {
     }
 
     // get config of blockchain network, chain id and contract addresses
-    const bcChainId = (await config.requireString('BLOCKCHAIN_CHAIN_ID')) as ChainId
-    const bcNetwork = (await config.requireString('BLOCKCHAIN_NETWORK')) as EthereumNetwork
+    const bcNetwork = (await config.requireString('BLOCKCHAIN_NETWORK')) as Network
+    const bcChainId = (await config.requireString('BLOCKCHAIN_CHAIN_ID')) as EthereumChainId
 
     // check and init mappings
     const PROPERTY_INDEX_NAME = `${MetaversePlatform.Cryptovoxels}-${bcChainId}-${bcNetwork}`
